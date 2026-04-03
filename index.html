@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>For Nesma 🌸</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pink-light: #FFD6E0;
+    --pink-mid: #FFC0CB;
+    --pink-vivid: #FF8FAB;
+    --pink-deep: #FF4D8D;
+    --gold: #F7C873;
+    --white-glass: rgba(255,255,255,0.18);
+    --white-glass-border: rgba(255,255,255,0.35);
+    --blur: blur(18px);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: 'DM Sans', sans-serif;
+    background: #ffe8f0;
+    cursor: none;
+  }
+
+  /* ── Custom Cursor ── */
+  #cursor {
+    position: fixed; width: 18px; height: 18px;
+    pointer-events: none; z-index: 99999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.12s ease, width 0.2s, height 0.2s;
+  }
+  #cursor svg { width: 100%; height: 100%; }
+  body.hovering #cursor { width: 28px; height: 28px; }
+
+  /* ── Background Gradient ── */
+  #bg {
+    position: fixed; inset: 0; z-index: 0;
+    background: radial-gradient(ellipse at 20% 20%, #FFD6E0 0%, transparent 55%),
+                radial-gradient(ellipse at 80% 80%, #FF8FAB 0%, transparent 55%),
+                radial-gradient(ellipse at 50% 50%, #FFC0CB 0%, transparent 70%),
+                linear-gradient(135deg, #ffe4ed 0%, #ffc0d4 100%);
+    transition: background-position 0.1s;
+  }
+  #parallax-layer {
+    position: fixed; inset: 0; z-index: 0;
+    background: radial-gradient(ellipse at var(--mx, 50%) var(--my, 50%), rgba(255,77,141,0.12) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  /* ── Hearts Canvas ── */
+  #hearts-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+
+  /* ── Music Toggle ── */
+  #music-btn {
+    position: fixed; top: 22px; right: 24px; z-index: 9999;
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--white-glass);
+    backdrop-filter: var(--blur);
+    border: 1px solid var(--white-glass-border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; cursor: none;
+    box-shadow: 0 4px 24px rgba(255,77,141,0.12);
+    transition: transform 0.2s, box-shadow 0.2s;
+    user-select: none;
+  }
+  #music-btn:hover { transform: scale(1.12); box-shadow: 0 6px 32px rgba(255,77,141,0.22); }
+  #music-btn.playing { animation: spin-slow 4s linear infinite; }
+  @keyframes spin-slow { to { transform: rotate(360deg); } }
+
+  /* ── Stage Container ── */
+  .stage {
+    position: fixed; inset: 0; z-index: 10;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.8s cubic-bezier(0.4,0,0.2,1);
+    padding: 20px;
+  }
+  .stage.active { opacity: 1; pointer-events: all; }
+
+  /* ── Glass Card ── */
+  .glass {
+    background: var(--white-glass);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    border: 1px solid var(--white-glass-border);
+    border-radius: 28px;
+    box-shadow: 0 8px 48px rgba(255,77,141,0.10), 0 2px 8px rgba(255,143,171,0.08);
+  }
+
+  /* ════════════════════════ STAGE 1 – ACCESS ════════════════════════ */
+  #stage-1 .card { width: min(420px, 100%); padding: 52px 44px 48px; text-align: center; }
+  .hey-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(62px, 14vw, 96px); font-weight: 300;
+    color: var(--pink-deep); line-height: 1; letter-spacing: -2px;
+    animation: float-hey 4s ease-in-out infinite;
+  }
+  @keyframes float-hey { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+  .sub-text { font-size: 14px; font-weight: 200; color: #c0607a; margin-top: 10px; margin-bottom: 36px; }
+  #pw-input {
+    width: 100%; padding: 14px 20px; border-radius: 50px;
+    border: 1.5px solid var(--white-glass-border); background: rgba(255,255,255,0.25);
+    backdrop-filter: blur(8px); font-size: 15px; color: #8b3a52; text-align: center;
+    outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .pw-hint { font-size: 11px; color: #d4869a; min-height: 18px; margin-top: 10px; margin-bottom: 20px; }
+  .pw-hint.error { color: var(--pink-deep); animation: shake 0.4s ease; }
+  @keyframes shake { 0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)} }
+  .btn-primary {
+    display: inline-block; padding: 13px 40px; border-radius: 50px; border: none; cursor: none;
+    background: linear-gradient(135deg, var(--pink-vivid), var(--pink-deep));
+    color: #fff; font-size: 14px; font-weight: 300; box-shadow: 0 4px 20px rgba(255,77,141,0.30);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(255,77,141,0.40); }
+
+  /* ════════════════════════ STAGE 2 – MYSTERY ════════════════════════ */
+  #stage-2 { flex-direction: column; text-align: center; }
+  .anime-bg { position: fixed; inset: 0; z-index: -1; background: url('https://media.giphy.com/media/l0ExncehJzexFpRHq/giphy.gif') center/cover no-repeat; opacity: 0.07; }
+  .mystery-line { font-family: 'Cormorant Garamond', serif; font-size: clamp(20px, 5vw, 30px); opacity: 0; transform: translateY(20px); transition: 1s ease; font-style: italic; color: #8b3a52; }
+  .mystery-line.show { opacity: 1; transform: translateY(0); }
+  .bold-line { font-size: clamp(28px, 7vw, 44px); font-weight: 400; font-style: normal; color: var(--pink-deep); margin-top: 6px; }
+  .btn-glow { margin-top: 44px; padding: 14px 48px; border-radius: 50px; border: 1.5px solid var(--pink-vivid); background: rgba(255,143,171,0.12); color: var(--pink-deep); opacity: 0; transform: translateY(14px); transition: 0.8s; }
+  .btn-glow.show { opacity: 1; transform: translateY(0); }
+
+  /* ════════════════════════ STAGE 3 – PUZZLE ════════════════════════ */
+  .emoji-grid { display: flex; gap: 28px; justify-content: center; margin-top: 40px; }
+  .emoji-btn { width: 88px; height: 88px; border-radius: 24px; background: rgba(255,255,255,0.28); border: 1.5px solid var(--white-glass-border); font-size: 42px; display: flex; align-items: center; justify-content: center; transition: 0.2s; cursor: none; }
+  .emoji-btn:hover { transform: scale(1.12); animation: pulse-emoji 0.6s ease infinite; }
+  @keyframes pulse-emoji { 0%,100%{transform:scale(1.12)} 50%{transform:scale(1.18)} }
+
+  /* ════════════════════════ STAGE 4 – FINALE ════════════════════════ */
+  #stage-4 .inner { display: flex; flex-direction: column; align-items: center; width: min(600px, 100%); padding: 0 20px; max-height: 100vh; overflow-y: auto; scrollbar-width: none; }
+  #rose-wrap { width: 140px; height: 140px; position: relative; margin-top: 40px; cursor: none; filter: drop-shadow(0 4px 18px rgba(255,77,141,0.25)); }
+  #msg-card { width: 100%; padding: 40px 36px; margin-top: 28px; margin-bottom: 40px; opacity: 0; transform: translateY(30px); transition: 1s ease 0.3s; }
+  #msg-card.show { opacity: 1; transform: translateY(0); }
+  .birthday-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(26px, 6vw, 38px); color: var(--pink-deep); margin-bottom: 22px; }
+  #typewriter-text { font-size: clamp(13px, 2.5vw, 15px); font-weight: 200; color: #6e2d42; line-height: 1.9; }
+  .cursor-blink { display: inline-block; width: 2px; height: 1em; background: var(--pink-deep); animation: blink 0.8s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  .confetti-piece { position: fixed; pointer-events: none; z-index: 999; animation: fall-confetti var(--dur) ease var(--delay) forwards; }
+  @keyframes fall-confetti { 0% { transform: translateY(-20px) rotate(0deg); opacity:1; } 100% { transform: translateY(110vh) rotate(720deg); opacity:0; } }
+</style>
+</head>
+<body>
+
+<div id="cursor">
+  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L13.8 8.2H20.4L15 12L16.8 18.2L12 14.8L7.2 18.2L9 12L3.6 8.2H10.2L12 2Z" fill="#FF4D8D" opacity="0.9"/></svg>
+</div>
+
+<div id="bg"></div>
+<div id="parallax-layer"></div>
+<canvas id="hearts-canvas"></canvas>
+
+<div id="music-btn">🎵</div>
+<audio id="bg-music" loop>
+  <source src="jadal.mp3" type="audio/mpeg">
+</audio>
+<audio id="chime-sfx"><source src="https://www.soundjay.com/misc/sounds/magic-chime-02.mp3" type="audio/mpeg"></audio>
+
+<div id="stage-1" class="stage active">
+  <div class="card glass">
+    <div class="hey-text">Hey</div>
+    <div class="sub-text">A small surprise is waiting for you.</div>
+    <input id="pw-input" type="password" placeholder="enter the secret..." autocomplete="off" />
+    <div class="pw-hint" id="pw-hint">&nbsp;</div>
+    <button class="btn-primary" id="pw-submit">Open It</button>
+  </div>
+</div>
+
+<div id="stage-2" class="stage">
+  <div class="anime-bg"></div>
+  <div class="card glass">
+    <div class="mystery-line" id="ml1">Not everyone reaches this page...</div>
+    <div class="mystery-line bold-line" id="ml2">But you did.</div>
+    <button class="btn-glow" id="continue-btn">Continue &rarr;</button>
+  </div>
+</div>
+
+<div id="stage-3" class="stage">
+  <div class="card glass">
+    <div class="puzzle-q" style="font-family:'Cormorant Garamond',serif; font-style:italic; color:#7a3048;">Choose the one that represents today.</div>
+    <div class="emoji-grid">
+      <div class="emoji-btn" data-choice="wrong">❤️</div>
+      <div class="emoji-btn" data-choice="correct">🎂</div>
+      <div class="emoji-btn" data-choice="wrong">🎁</div>
+    </div>
+    <div class="puzzle-hint" id="puzzle-hint" style="margin-top:20px; font-size:11px; color:#d4869a;">&nbsp;</div>
+  </div>
+</div>
+
+<div id="stage-4" class="stage">
+  <div class="inner">
+    <div id="rose-wrap">
+      <svg id="rose-svg" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
+        <path class="rose-stem" d="M70 130 C70 130 68 110 70 90" stroke="#FF8FAB" stroke-width="2.5" fill="none"/>
+        <path class="rose-leaf" d="M70 105 Q55 95 50 80 Q65 85 70 98" fill="none" stroke="#FF8FAB" stroke-width="1.8"/>
+        <path class="rose-leaf" d="M70 110 Q85 100 90 85 Q75 90 70 103" fill="none" stroke="#FF8FAB" stroke-width="1.8"/>
+        <path class="rose-bud" d="M55 90 Q55 72 70 68 Q85 72 85 90 Q77 96 70 96 Q63 96 55 90Z" fill="none" stroke="#FF4D8D" stroke-width="2"/>
+        <g id="bloom-group" opacity="0">
+          <ellipse cx="70" cy="56" rx="10" ry="16" fill="#FF8FAB" transform="rotate(0,70,70)"/>
+          <ellipse cx="70" cy="56" rx="10" ry="16" fill="#FFC0CB" transform="rotate(60,70,70)"/>
+          <ellipse cx="70" cy="56" rx="10" ry="16" fill="#FF4D8D" transform="rotate(120,70,70)"/>
+          <ellipse cx="70" cy="56" rx="10" ry="16" fill="#FFD6E0" transform="rotate(180,70,70)"/>
+          <ellipse cx="70" cy="56" rx="10" ry="16" fill="#FF8FAB" transform="rotate(240,70,70)"/>
+          <ellipse cx="70" cy="56" rx="10" ry="16" fill="#FFC0CB" transform="rotate(300,70,70)"/>
+          <circle cx="70" cy="70" r="9" fill="#FF4D8D"/><circle cx="70" cy="70" r="5" fill="#FFD6E0"/>
+        </g>
+      </svg>
+    </div>
+    <div id="rose-hint" style="font-size:11px; color:#d4869a; margin-top:10px;">tap the rose to bloom</div>
+    <div id="msg-card" class="glass">
+      <div class="birthday-title">Happy Birthday, Nesma</div>
+      <div id="typewriter-text"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const cursor = document.getElementById('cursor');
+document.addEventListener('mousemove', e => { cursor.style.left = e.clientX + 'px'; cursor.style.top = e.clientY + 'px'; });
+document.querySelectorAll('button, input, .emoji-btn, #rose-wrap, #music-btn').forEach(el => {
+  el.addEventListener('mouseenter', () => document.body.classList.add('hovering'));
+  el.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
+});
+
+// HEARTS CANVAS
+(function(){
+  const canvas = document.getElementById('hearts-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, hearts = [];
+  function resize(){ W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+  resize(); window.addEventListener('resize', resize);
+
+  function heartPath(x, y, size){
+    ctx.beginPath();
+    ctx.moveTo(x, y + size / 4);
+    ctx.bezierCurveTo(x - size / 2, y - size / 2, x - size, y + size / 4, x, y + size);
+    ctx.bezierCurveTo(x + size, y + size / 4, x + size / 2, y - size / 2, x, y + size / 4);
+    ctx.closePath();
+  }
+
+  function makeHeart(){ return { x: Math.random() * W, y: -30, size: 8 + Math.random() * 20, speed: 0.4 + Math.random() * 1.2, opacity: 0.2 + Math.random() * 0.4, sway: Math.random() * Math.PI * 2, swayAmt: 15 + Math.random() * 25, swaySpeed: 0.008 + Math.random() * 0.012 }; }
+  for(let i=0;i<28;i++){ const h = makeHeart(); h.y = Math.random() * H; hearts.push(h); }
+  const colors = ['#FF8FAB','#FFC0CB','#FF4D8D','#FFD6E0'];
+
+  function animate(){
+    ctx.clearRect(0,0,W,H);
+    hearts.forEach((h,i) => {
+      h.y += h.speed; h.sway += h.swaySpeed;
+      const sx = h.x + Math.sin(h.sway) * h.swayAmt;
+      ctx.save(); ctx.globalAlpha = h.opacity; ctx.fillStyle = colors[i % 4];
+      heartPath(sx, h.y, h.size); ctx.fill(); ctx.restore();
+      if(h.y > H + 40){ Object.assign(h, makeHeart()); h.y = -30; }
+    });
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();
+
+const music = document.getElementById('bg-music');
+const musicBtn = document.getElementById('music-btn');
+let musicPlaying = false;
+musicBtn.addEventListener('click', () => {
+  if(!musicPlaying){ music.play().catch(()=>{}); musicBtn.textContent='🎶'; musicBtn.classList.add('playing'); }
+  else { music.pause(); musicBtn.textContent='🎵'; musicBtn.classList.remove('playing'); }
+  musicPlaying = !musicPlaying;
+});
+
+function goTo(from, to){
+  document.getElementById('stage-'+from).classList.remove('active');
+  setTimeout(()=>{ document.getElementById('stage-'+to).classList.add('active'); if(to===2)startMystery(); if(to===4)startFinale(); }, 800);
+}
+
+const pwInput = document.getElementById('pw-input');
+document.getElementById('pw-submit').addEventListener('click', () => {
+  // PASSWORD IS NOW naed
+  if(pwInput.value.toLowerCase() === 'naed') goTo(1,2);
+  else { document.getElementById('pw-hint').textContent='Try again...'; document.getElementById('pw-hint').classList.add('error'); }
+});
+
+function startMystery(){
+  setTimeout(()=>document.getElementById('ml1').classList.add('show'), 400);
+  setTimeout(()=>document.getElementById('ml2').classList.add('show'), 1400);
+  setTimeout(()=>document.getElementById('continue-btn').classList.add('show'), 2600);
+}
+document.getElementById('continue-btn').addEventListener('click', ()=>goTo(2,3));
+
+document.querySelectorAll('.emoji-btn').forEach(btn => {
+  btn.addEventListener('click', ()=>{
+    if(btn.dataset.choice === 'correct'){ document.getElementById('chime-sfx').play(); goTo(3,4); }
+    else { document.getElementById('puzzle-hint').textContent='Think of what makes today special...'; }
+  });
+});
+
+// REMOVED AUTO-PLAY FROM HERE
+function startFinale(){ launchConfetti(); }
+
+document.getElementById('rose-wrap').addEventListener('click', function(){
+  this.style.pointerEvents = 'none';
+  document.getElementById('rose-hint').style.opacity = '0';
+  const bloom = document.getElementById('bloom-group');
+  bloom.style.transition = 'opacity 1.2s, transform 1.2s cubic-bezier(0.34,1.56,0.64,1)';
+  bloom.style.opacity = '1'; bloom.style.transform = 'scale(1.2)';
+  setTimeout(()=>{ document.getElementById('msg-card').classList.add('show'); startTypewriter(); }, 900);
+});
+
+const MESSAGE = `To the girl who is literally a breath of fresh air...
+In a world that is sometimes too loud, you have this unique way of bringing calm and light wherever you go.
+As you start this brand-new chapter, I hope it is filled with nothing but soft aesthetics, big wins, and that pure, genuine joy you deserve.
+Keep dreaming big, keep being your authentic self, and most importantly...
+Keep shining like the star you are.
+Enjoy your special day to the fullest.`;
+
+function startTypewriter(){
+  const el = document.getElementById('typewriter-text');
+  let i=0;
+  function type(){
+    if(i < MESSAGE.length){
+      el.innerHTML += MESSAGE[i] === '\n' ? '<br>' : MESSAGE[i];
+      i++; setTimeout(type, 30);
+    }
+  }
+  type();
+}
+
+function launchConfetti(){
+  for(let i=0;i<80;i++){
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    el.style.left = Math.random()*100 + 'vw';
+    el.style.background = ['#FF4D8D','#FFC0CB','#F7C873'][Math.floor(Math.random()*3)];
+    el.style.width = el.style.height = (6 + Math.random()*8) + 'px';
+    el.style.setProperty('--dur', (2 + Math.random()*3) + 's');
+    el.style.setProperty('--delay', (Math.random()*2) + 's');
+    document.body.appendChild(el);
+  }
+}
+</script>
+</body>
+</html>
